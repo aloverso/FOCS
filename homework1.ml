@@ -87,11 +87,15 @@ let rec last (xs) =
    if xs = [] then failwith "empty list"
    else match xs with first::rest -> if rest = [] then first else last(rest)
 
+let rec separate_helper (xs, res1, res2) = 
+   if xs = [] then (res1, res2)
+   else match xs with first::rest ->
+      match first with (x,y) ->
+         separate_helper(rest, insert_at_end(res1, x), insert_at_end(res2, y))
 
 let separate (xs) = 
-   failwith "not implemented"
-
-
+   separate_helper(xs, [], [])
+   
 
 (* Question 3 *)
 
@@ -107,17 +111,40 @@ let rec setSub (xs,ys) =
    else match xs with first::rest -> setIn(first, ys) && setSub(rest,ys)
 
 let setEqual (xs,ys) = 
-   failwith "not implemented"
+   setSub(xs, ys) && setSub(ys, xs)
 
+let rec setUnion_helper(xs,ys,res) =
+   if xs = [] then
+      if ys = [] then res
+      else match ys with first::rest ->
+         if not(setIn(first,res)) then setUnion_helper(xs, rest, insert_at_end(res, first))
+         else setUnion_helper(xs, rest, res)
+   else match xs with first::rest ->
+      if not(setIn(first,res)) then setUnion_helper(rest, ys, insert_at_end(res, first))
+      else setUnion_helper(rest, ys, res)
 
 let setUnion (xs,ys) = 
-   failwith "not implemented"
+   setUnion_helper(xs,ys,[])
 
+let rec setInter_helper (xs,ys,res) =
+   if xs = [] then
+      if ys = [] then res
+      else match ys with first::rest ->
+         if not(setIn(first,res)) && setIn(first,xs) then setInter_helper(xs, rest, insert_at_end(res, first))
+         else setInter_helper(xs, rest, res)
+   else match xs with first::rest ->
+      if not(setIn(first,res)) && setIn(first,ys) then setInter_helper(rest, ys, insert_at_end(res, first))
+      else setInter_helper(rest, ys, res)
 
 let setInter (xs,ys) = 
-   failwith "not implemented"
+   setInter_helper(xs,ys,[])
 
+let rec length_helper (xs, n) =
+   if xs = [] then n
+   else match xs with first::rest -> length_helper(rest, n+1) 
+
+let length (xs) =
+   length_helper(xs, 0)
 
 let setSize (xs) = 
-   failwith "not implemented"
-
+   length(setUnion(xs,xs))
